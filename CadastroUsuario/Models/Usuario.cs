@@ -14,5 +14,21 @@ namespace CadastroUsuario.Models
         public string Cidade { get; set; }
         public string Estado { get; set; }
         public string Cep { get; set; }
+
+        public string NomeCompleto 
+        { 
+            get 
+            {
+                return Nome + " " + Sobrenome;
+            }
+        }
+
+        public string EnderecoCompleto
+        {
+            get
+            {
+                return Endereco + " " + Numero + "/" + Complemento + " " + Cidade + "/" + Estado + " - " + Cep;
+            }
+        }
     }
 }

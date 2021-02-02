@@ -20,7 +20,7 @@ namespace CadastroUsuario
         {
             InitializeComponent();
             PopularComboBoxDeEstados();
-            MontarDataGridView();
+            dgvUsuarios.AutoGenerateColumns = false;
         }
 
         private void label7_Click(object sender, EventArgs e)
@@ -118,11 +118,20 @@ namespace CadastroUsuario
 
         private void MontarDataGridView()
         {
-            dgvUsuarios.Columns.Add("NomeCompleto", "Nome Completo");
-            dgvUsuarios.Columns.Add("CPF", "CPF");
-            dgvUsuarios.Columns.Add("DataDeNascimento", "Data de Nascimento");
-            dgvUsuarios.Columns.Add("EnderecoCompleto", "Endereço Completo");
+            DadosUsuario dados = new DadosUsuario();
+            var usuarios = dados.ObterUsuarios();
 
+            dgvUsuarios.DataSource = usuarios;
+        }
+
+        private void ValidarSeExisteUsuario(string cpf)
+        {
+            var dados = new DadosUsuario();
+            var existe = dados.VerificarSeExisteUsuarioPorCpf(cpf);
+            if (existe)
+            {
+                throw new Exception("Este CPF já existe!");
+            }
         }
 
         private void btnCadastrar_Click(object sender, EventArgs e)
@@ -131,6 +140,7 @@ namespace CadastroUsuario
             {
                 ValidarCamposObrigatorios();
                 ValidarCPF();
+                ValidarSeExisteUsuario(txtCpf.Text?.Trim());
 
                 var usuario = FabricaDeObjetos.FabricarUsuario(txtNome.Text, txtSobrenome.Text, txtCpf.Text,
                     txtDataDeNascimento.Text, txtEndereco.Text, txtNumero.Text, txtComplemento.Text,
@@ -145,6 +155,7 @@ namespace CadastroUsuario
                         MessageBoxIcon.Information);
 
                     LimparCampos();
+                    MontarDataGridView();
                 }
             }
             catch (Exception ex)

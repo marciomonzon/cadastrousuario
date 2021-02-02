@@ -43,7 +43,6 @@ namespace CadastroUsuario.Dados
                 if (objSqlCeConnection.State != ConnectionState.Closed)
                 {
                     objSqlCeConnection.Close();
-                    objSqlCeConnection.Dispose();
                 }
             }
             catch (Exception e)
@@ -54,7 +53,6 @@ namespace CadastroUsuario.Dados
 
         public int Insert(Usuario usuario)
         {
-
             string sql = @"insert into Usuario(Nome, Sobrenome, Cpf, DataDeNascimento, 
             Cep, Endereco, Numero, Complemento, Cidade, Estado) values
             (@nome, @sobrenome, @cpf, @data, @cep, @endereco, @numero, @complemento, 
@@ -79,13 +77,86 @@ namespace CadastroUsuario.Dados
                 var retorno = dCmd.ExecuteNonQuery();
                 return retorno;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw;
             }
             finally
             {
                 dCmd.Dispose();
+                Dispose();
+            }
+        }
+
+        public List<Usuario> ObterUsuarios()
+        {
+            try
+            {
+                SqlCommand command = new SqlCommand(@"Select Nome, Sobrenome, Cpf, DataDeNascimento, 
+                Cep, Endereco, Numero, Complemento, Cidade, Estado from Usuario", objSqlCeConnection);
+
+                Open();
+
+                var usuarios = new List<Usuario>();
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        usuarios.Add(new Usuario()
+                        {
+                            Nome = reader["Nome"].ToString(),
+                            Sobrenome = reader["Sobrenome"].ToString(),
+                            Cpf = reader["Cpf"].ToString(),
+                            Endereco = reader["Endereco"].ToString(),
+                            Numero = reader["Numero"].ToString(),
+                            Complemento = reader["Complemento"].ToString(),
+                            DataDeNascimento = Convert.ToDateTime(reader["DataDeNascimento"]),
+                            Cep = reader["Cep"].ToString(),
+                            Cidade = reader["Cidade"].ToString(),
+                            Estado = reader["Estado"].ToString()
+                        });
+                    }
+                }
+
+                return usuarios;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                Dispose();
+            }
+        }
+
+        public bool VerificarSeExisteUsuarioPorCpf(string cpf)
+        {
+            try
+            {
+                SqlCommand command = new SqlCommand(@"Select Cpf from Usuario where Cpf = @Cpf", objSqlCeConnection);
+                command.Parameters.AddWithValue("@Cpf", cpf);
+                Open();
+
+                var existe = false;
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        existe = true;
+                    }
+                }
+
+                return existe;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
                 Dispose();
             }
         }
